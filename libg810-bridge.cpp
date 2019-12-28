@@ -70,3 +70,19 @@ int LIB_LedKeyboardSetKeys(void* ledKeyboard, GoKeyValue goKeyValues[], uint32_t
 	return AsLedKeyboard(ledKeyboard)->setKeys(keyValues);
 }
 
+int LIB_LedKeyboardSetAllKeys(void* ledKeyboard, GoKeyColor color) {
+	return AsLedKeyboard(ledKeyboard)->setAllKeys({
+		color.red,
+		color.green,
+		color.blue,
+	});
+}
+
+int LIB_LedKeyboardSetGroupKeys(void* ledKeyboard, uint8_t keyGroup, GoKeyColor color) {
+	return AsLedKeyboard(ledKeyboard)->setGroupKeys((LedKeyboard::KeyGroup)keyGroup, {
+		color.red,
+		color.green,
+		color.blue,
+	});
+}
+

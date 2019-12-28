@@ -36,6 +36,8 @@ void LIB_LedKeyboardGetDeviceInfo(void* ledKeyboard, GoDeviceInfo* pdi);
 int LIB_LedKeyboardCommit(void* ledKeyboard);
 int LIB_LedKeyboardSetKey(void* ledKeyboard, GoKeyValue keyValue);
 int LIB_LedKeyboardSetKeys(void* ledKeyboard, GoKeyValue keyValues[], uint32_t nElements);
+int LIB_LedKeyboardSetAllKeys(void* ledKeyboard, GoKeyColor color);
+int LIB_LedKeyboardSetGroupKeys(void* ledKeyboard, uint8_t keyGroup, GoKeyColor color);
 
 #ifdef __cplusplus
 }

@@ -4,8 +4,11 @@ package g810
 // #cgo LDFLAGS: -L. -lg810-led-bridge -lg810-led
 // #include "libg810-bridge.h"
 import "C"
-import "unsafe"
-import "errors"
+
+import (
+	"errors"
+	"unsafe"
+)
 
 type LedKeyboard struct {
 	ptr unsafe.Pointer
@@ -18,7 +21,7 @@ type KeyColor struct {
 }
 
 type KeyValue struct {
-	ID uint16
+	ID Key
 	Color KeyColor
 }
 
@@ -30,26 +33,6 @@ type DeviceInfo struct {
 	SerialNumber string
 	KeyboardModel string
 }
-
-const (
-	KG_LOGO = iota
-	KG_INDICATORS = iota
-	KG_MULTIMEDIA = iota
-	KG_GKEYS = iota
-	KG_KEYS = iota
-)
-
-const (
-	KB_UNKNOWN = iota
-	KB_G213 = iota
-	KB_G410 = iota
-	KB_G413 = iota
-	KB_G513 = iota
-	KB_G610 = iota
-	KB_G810 = iota
-	KB_G910 = iota
-	KB_GPRO = iota
-)
 
 var KeyboardModelName = map[uint8]string{
 	KB_UNKNOWN: "Unknown",
@@ -189,3 +172,32 @@ func (lk LedKeyboard) SetKeys(keys []KeyValue) error {
 		return errors.New("C.LIB_LedKeyboardSetKeys returned an error.")
 	}
 }
+
+func (lk LedKeyboard) SetAllKeys(color KeyColor) error {
+	cKeyColor := C.GoKeyColor{
+		(C.uchar)(color.Red),
+		(C.uchar)(color.Green),
+		(C.uchar)(color.Blue),
+	}
+
+	if C.LIB_LedKeyboardSetAllKeys(lk.ptr, cKeyColor) == 1 {
+		return nil
+	} else {
+		return errors.New("C.LIB_LedKeyboardSetAllKeys returned an error.")
+	}
+}
+
+func (lk LedKeyboard) SetGroupKeys(keyGroup KeyGroup, color KeyColor) error {
+	cKeyColor := C.GoKeyColor{
+		(C.uchar)(color.Red),
+		(C.uchar)(color.Green),
+		(C.uchar)(color.Blue),
+	}
+
+	if C.LIB_LedKeyboardSetGroupKeys(lk.ptr, (C.uchar)(keyGroup), cKeyColor) == 1 {
+		return nil
+	} else {
+		return errors.New("C.LIB_LedKeyboardSetGroupKeys returned an error.")
+	}
+}
+
