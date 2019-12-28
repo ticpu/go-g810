@@ -5,6 +5,7 @@ package g810
 // #include "libg810-bridge.h"
 import "C"
 import "unsafe"
+import "errors"
 
 type LedKeyboard struct {
 	ptr unsafe.Pointer
@@ -88,22 +89,39 @@ func (lk LedKeyboard) Free() {
 	C.LIB_LedKeyboardDestroy(lk.ptr)
 }
 
-func (lk LedKeyboard) Open() bool {
-	return C.LIB_LedKeyboardOpen(lk.ptr) != 0
+func (lk LedKeyboard) Open() error {
+	if C.LIB_LedKeyboardOpen(lk.ptr) == 1 {
+		return nil
+	} else {
+		return errors.New("C.LIB_LedKeyboardOpen returned an error.")
+	}
 }
 
-func (lk LedKeyboard) OpenEx(vendor_id uint16, product_id uint16, serial string) bool {
+func (lk LedKeyboard) OpenEx(vendor_id uint16, product_id uint16, serial string) error {
 	cSerial := C.CString(serial)
 	defer C.free(unsafe.Pointer(cSerial))
-	return C.LIB_LedKeyboardOpenEx(lk.ptr, C.ushort(vendor_id), C.ushort(product_id), cSerial) != 0
+
+	if C.LIB_LedKeyboardOpenEx(lk.ptr, C.ushort(vendor_id), C.ushort(product_id), cSerial) == 1 {
+		return nil
+	} else {
+		return errors.New("C.LIB_LedKeyboardOpenEx returned an error.")
+	}
 }
 
-func (lk LedKeyboard) Commit() bool {
-	return C.LIB_LedKeyboardCommit(lk.ptr) != 0
+func (lk LedKeyboard) Commit() error {
+	if C.LIB_LedKeyboardCommit(lk.ptr) == 1 {
+		return nil
+	} else {
+		return errors.New("C.LIB_LedKeyboardCommit returned an error.")
+	}
 }
 
-func (lk LedKeyboard) Close() bool {
-	return C.LIB_LedKeyboardClose(lk.ptr) != 0
+func (lk LedKeyboard) Close() error {
+	if C.LIB_LedKeyboardClose(lk.ptr) == 1 {
+		return nil
+	} else {
+		return errors.New("C.LIB_LedKeyboardClose returned an error.")
+	}
 }
 
 func (lk LedKeyboard) GetDeviceInfo() DeviceInfo {
@@ -128,7 +146,7 @@ func (lk LedKeyboard) GetDeviceInfo() DeviceInfo {
 	return deviceInfo
 }
 
-func (lk LedKeyboard) SetKey(key KeyValue) bool {
+func (lk LedKeyboard) SetKey(key KeyValue) error {
 	cKeyValue := C.GoKeyValue{
 		key: (C.ushort)(key.ID),
 		color: C.GoKeyColor{
@@ -138,11 +156,19 @@ func (lk LedKeyboard) SetKey(key KeyValue) bool {
 		},
 	}
 
-	return C.LIB_LedKeyboardSetKey(lk.ptr, cKeyValue) != 0
+	if C.LIB_LedKeyboardSetKey(lk.ptr, cKeyValue) == 1 {
+		return nil
+	} else {
+		return errors.New("C.LIB_LedKeyboardSetKey returned an error.")
+	}
 }
 
-func (lk LedKeyboard) SetKeys(keys []KeyValue) bool {
+func (lk LedKeyboard) SetKeys(keys []KeyValue) error {
 	cKeyValuesCount := len(keys)
+
+	if cKeyValuesCount < 1 {
+		return errors.New("No keys in dataset.")
+	}
 
 	cKeyValuesPtr := C.malloc((C.ulong)(C.sizeof_GoKeyValue*cKeyValuesCount))
 	defer C.free(cKeyValuesPtr)
@@ -157,5 +183,9 @@ func (lk LedKeyboard) SetKeys(keys []KeyValue) bool {
 		}
 	}
 
-	return C.LIB_LedKeyboardSetKeys(lk.ptr, (*C.GoKeyValue)(cKeyValuesPtr), C.uint(cKeyValuesCount)) != 0
+	if C.LIB_LedKeyboardSetKeys(lk.ptr, (*C.GoKeyValue)(cKeyValuesPtr), C.uint(cKeyValuesCount)) == 1 {
+		return nil
+	} else {
+		return errors.New("C.LIB_LedKeyboardSetKeys returned an error.")
+	}
 }
